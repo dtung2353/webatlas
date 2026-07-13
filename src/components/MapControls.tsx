@@ -6,8 +6,6 @@ import Draw from 'ol/interaction/Draw';
 import VectorSource from 'ol/source/Vector';
 import VectorLayer from 'ol/layer/Vector';
 import { getLength, getArea } from 'ol/sphere';
-import LineString from 'ol/geom/LineString';
-import Polygon from 'ol/geom/Polygon';
 
 const MapControls: React.FC = () => {
   const { map } = useMapContext();
@@ -65,23 +63,43 @@ const MapControls: React.FC = () => {
         type: type,
       });
 
-      draw.on('drawstart', () => {
+      let listener: any;
+      draw.on('drawstart', (e) => {
         source.clear();
         setMeasureValue(null);
+        
+        const sketch = e.feature;
+        listener = sketch.getGeometry()?.on('change', (evt) => {
+          const geom = evt.target;
+          if (geom.getType() === 'LineString') {
+            const length = getLength(geom);
+            const output = length > 100 ? (Math.round((length / 1000) * 100) / 100) + ' km' : (Math.round(length * 100) / 100) + ' m';
+            setMeasureValue(`Đang đo: ${output}`);
+          } else if (geom.getType() === 'Polygon') {
+            const area = getArea(geom);
+            const output = area > 10000 ? (Math.round((area / 1000000) * 100) / 100) + ' km²' : (Math.round(area * 100) / 100) + ' m²';
+            setMeasureValue(`Đang đo: ${output}`);
+          }
+        });
       });
 
       draw.on('drawend', (e) => {
         const geom = e.feature.getGeometry();
         if (!geom) return;
 
-        if (geom instanceof LineString) {
+        if (geom.getType() === 'LineString') {
           const length = getLength(geom);
           const output = length > 100 ? (Math.round((length / 1000) * 100) / 100) + ' km' : (Math.round(length * 100) / 100) + ' m';
           setMeasureValue(`Chiều dài: ${output}`);
-        } else if (geom instanceof Polygon) {
+        } else if (geom.getType() === 'Polygon') {
           const area = getArea(geom);
           const output = area > 10000 ? (Math.round((area / 1000000) * 100) / 100) + ' km²' : (Math.round(area * 100) / 100) + ' m²';
           setMeasureValue(`Diện tích: ${output}`);
+        }
+        
+        // Unbind the change listener
+        if (listener) {
+          import('ol/Observable').then(({ unByKey }) => unByKey(listener));
         }
       });
 
@@ -166,6 +184,12 @@ const MapControls: React.FC = () => {
           <Square size={18} />
         </button>
       </div>
+
+      {activeTool !== 'pan' && !measureValue && (
+        <div className="measure-result glass-panel" style={{ fontSize: '13px', opacity: 0.9, maxWidth: '200px', whiteSpace: 'normal', textAlign: 'right' }}>
+          Nhấp chuột trên bản đồ để đo. Nhấp đúp (Double-click) để kết thúc.
+        </div>
+      )}
 
       {measureValue && (
         <div className="measure-result glass-panel">
