@@ -2,11 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useMapContext } from './MapContext';
 import { X, Info, Activity, Database, Droplets, ShieldCheck, AlertTriangle, Sliders } from 'lucide-react';
 
-interface PopupData {
-  coordinate: number[];
-  feature: any; // GeoJSON properties
-}
-
 interface DamDetails {
   ten: string;
   loai: string;
@@ -81,8 +76,7 @@ const getDetailedDamInfo = (id: number, name: string, wattage?: number): DamDeta
 };
 
 const DynamicPopup: React.FC = () => {
-  const { map, reservoirFilter, setReservoirFilter } = useMapContext();
-  const [popupData, setPopupData] = useState<PopupData | null>(null);
+  const { map, reservoirFilter, setReservoirFilter, popupData, setPopupData } = useMapContext();
   const [pixel, setPixel] = useState<number[]>([0, 0]);
   const [detailedDam, setDetailedDam] = useState<any | null>(null);
 
@@ -382,7 +376,29 @@ const DynamicPopup: React.FC = () => {
       );
     }
 
-    // 6. Nếu là Tỉnh / Huyện (Hành chính)
+    // 6. Nếu là Tỉnh / Huyện / Xã (Hành chính từ GADM)
+    if (props.NAME_1 !== undefined) {
+      return (
+        <>
+          <div className="info-row">
+            <Info size={14} className="text-blue-500" />
+            <span>Cấp hành chính: <strong>{props.NAME_3 ? 'Xã/Phường' : props.NAME_2 ? 'Quận/Huyện' : 'Tỉnh/Thành phố'}</strong></span>
+          </div>
+          <div className="info-row">
+            <Database size={14} className="text-blue-500" />
+            <span>Trực thuộc: <strong>{props.NAME_2 ? `${props.NAME_2}, ` : ''}{props.NAME_1}</strong></span>
+          </div>
+          {props.ENGTYPE_1 && (
+            <div className="info-row">
+              <Activity size={14} className="text-blue-500" />
+              <span>Phân loại: <strong>{props.ENGTYPE_3 || props.ENGTYPE_2 || props.ENGTYPE_1}</strong></span>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    // 7. Nếu là Tỉnh / Huyện (Mock data cũ)
     if (props.population !== undefined || props.province !== undefined) {
       return (
         <>
@@ -435,6 +451,8 @@ const DynamicPopup: React.FC = () => {
     yTranslate = '0';
   }
 
+  const popupTitle = props.NAME_3 || props.NAME_1 || props.Vietnamese || props.Ten || props.name || (props.OBJECTID ? `Sông ngòi (ID: ${props.OBJECTID})` : 'Đối tượng không tên');
+
   return (
     <>
       <div 
@@ -457,7 +475,7 @@ const DynamicPopup: React.FC = () => {
         </button>
         
         <div className="popup-header">
-          <h3 className="popup-title">{props.Vietnamese || props.Ten || props.name || (props.OBJECTID ? `Sông ngòi (ID: ${props.OBJECTID})` : 'Đối tượng không tên')}</h3>
+          <h3 className="popup-title">{popupTitle}</h3>
           {props.riskLevel && (
             <span className={`status-badge ${props.riskLevel === 'Cao' ? 'risk-high' : props.riskLevel === 'Trung bình' ? 'risk-medium' : 'risk-low'}`}>
               {props.riskLevel}

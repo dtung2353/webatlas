@@ -11,6 +11,11 @@ export interface LayerState {
   opacity: number;
 }
 
+export interface PopupData {
+  coordinate: number[];
+  feature: any; // GeoJSON properties
+}
+
 interface MapContextType {
   map: Map | null;
   setMap: (map: Map | null) => void;
@@ -21,6 +26,8 @@ interface MapContextType {
   setLayerOpacity: (layerId: string, opacity: number) => void;
   reservoirFilter: ReservoirFilterType;
   setReservoirFilter: (filter: ReservoirFilterType) => void;
+  popupData: PopupData | null;
+  setPopupData: (data: PopupData | null) => void;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -29,6 +36,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [map, setMap] = useState<Map | null>(null);
   const [basemap, setBasemap] = useState<BasemapType>('street');
   const [reservoirFilter, setReservoirFilter] = useState<ReservoirFilterType>('all');
+  const [popupData, setPopupData] = useState<PopupData | null>(null);
   
   // Initialize layers state from mockData
   const initialLayersState: LayerState[] = [];
@@ -61,7 +69,8 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       map, setMap,
       basemap, setBasemap,
       layersState, toggleLayerVisibility, setLayerOpacity,
-      reservoirFilter, setReservoirFilter
+      reservoirFilter, setReservoirFilter,
+      popupData, setPopupData
     }}>
       {children}
     </MapContext.Provider>

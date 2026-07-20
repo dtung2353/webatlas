@@ -65,12 +65,24 @@ const MapContainer: React.FC = () => {
       return layer;
     };
 
-    // Helper tạo vector layer từ URL GeoJSON
+    // Helper tạo vector layer từ URL GeoJSON (với custom fetch để bypass ngrok)
     const createVectorLayerFromUrl = (id: string, url: string, style: any, options: any = {}) => {
-      const source = new VectorSource({
-        url: url,
-        format: new GeoJSON()
-      });
+      const source = new VectorSource();
+      fetch(url, { headers: { 'ngrok-skip-browser-warning': '1' } })
+        .then(res => res.json())
+        .then(data => {
+          const features = new GeoJSON().readFeatures(data, {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          });
+          source.addFeatures(features);
+          // Trigger style/layer update if needed
+          if (id === 'layer_dams' && reservoirFilterRef.current !== 'all') {
+            source.changed();
+          }
+        })
+        .catch(console.error);
+
       const layer = new VectorLayer({
         source,
         style,
@@ -189,8 +201,8 @@ const MapContainer: React.FC = () => {
       stroke: new Stroke({ color: '#4f46e5', width: 1.5 })
     });
 
-    const damsLayer = createVectorLayerFromUrl('layer_dams', './thuydienvietnam.geojson', damsStyle);
-    const riversLayer = createVectorLayerFromUrl('layer_rivers', './thuyhe.geojson', riversStyle);
+    const damsLayer = createVectorLayerFromUrl('layer_dams', 'https://overuse-dictator-appear.ngrok-free.dev/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=webatlas:thuydienvietnam%20%E2%80%94%20hydropower_2020&outputFormat=application/json', damsStyle);
+    const riversLayer = createVectorLayerFromUrl('layer_rivers', 'https://overuse-dictator-appear.ngrok-free.dev/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=webatlas:thuyhe&outputFormat=application/json', riversStyle);
     const stationsLayer = createVectorLayer('layer_stations', stationsMockData, stationsStyle);
     const floodLayer = createVectorLayer('layer_flood', floodMockData, floodStyle);
     const droughtSurveyLayer = createVectorLayer('layer_drought_survey', droughtSurveyMockData, droughtSurveyStyle);
@@ -315,7 +327,7 @@ const MapContainer: React.FC = () => {
     };
 
     // Tải layer ranh giới tỉnh và xã từ GeoJSON (quản lý ẩn hiện động theo mức zoom qua event listener để tránh lỗi hiển thị khi di chuyển)
-    const provincesLayer = createVectorLayerFromUrl('layer_provinces_2026', './gadm41_VNM_1.geojson', provincesStyle);
+    const provincesLayer = createVectorLayerFromUrl('layer_provinces_2026', 'https://overuse-dictator-appear.ngrok-free.dev/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=webatlas:diaphantinhvietnam&outputFormat=application/json', provincesStyle);
     
     const wardsLayer = createVectorLayerFromUrl('layer_wards_2026', './gadm41_VNM_3.geojson', wardsStyle);
 
@@ -335,11 +347,11 @@ const MapContainer: React.FC = () => {
         floodGenerationLayer
       ],
       view: new View({
-        center: fromLonLat([108.2, 13.5]),
-        zoom: 7,
+        center: fromLonLat([106.0, 16.0]),
+        zoom: 6,
         minZoom: 4.0,
         maxZoom: 20,
-        extent: transformExtent([107.0, 10.5, 109.5, 16.5], 'EPSG:4326', 'EPSG:3857'),
+        extent: transformExtent([100.0, 8.0, 115.0, 24.0], 'EPSG:4326', 'EPSG:3857'),
       }),
       controls: []
     });
