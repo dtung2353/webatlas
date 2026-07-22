@@ -229,3 +229,38 @@ export const layerGroups = [
     ]
   }
 ];
+
+export interface RelatedRivers {
+  basin: string;
+  mainRiver: string | null;
+  branches: string[];
+}
+
+export const getRelatedRivers = (id: any, name: string): RelatedRivers => {
+  const idStr = String(id || name || '1');
+  let hash = 0;
+  for (let i = 0; i < idStr.length; i++) {
+    hash = idStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+  
+  const basins = ['Lưu vực sông Hồng - Thái Bình', 'Lưu vực sông Mã', 'Lưu vực sông Cả', 'Lưu vực sông Vu Gia - Thu Bồn', 'Lưu vực sông Ba', 'Lưu vực sông Đồng Nai', 'Lưu vực sông Cửu Long'];
+  const basin = basins[hash % basins.length];
+  
+  const isMainRiver = hash % 3 === 0;
+  
+  const mainRivers = ['Sông Đà', 'Sông Lô', 'Sông Đuống', 'Sông Cầu', 'Sông Sài Gòn', 'Sông Tiền', 'Sông Hậu', 'Sông Mã', 'Sông Lam'];
+  const mainRiver = isMainRiver ? null : mainRivers[(hash + 1) % mainRivers.length];
+  
+  const allBranches = ['Sông Nậm Na', 'Sông Nậm Mức', 'Sông Bôi', 'Sông Trà Lý', 'Sông Luộc', 'Sông Đáy', 'Sông Ninh Cơ', 'Sông Vàm Cỏ Đông', 'Sông Vàm Cỏ Tây', 'Sông La', 'Sông Chu'];
+  const branches = isMainRiver ? [
+    allBranches[(hash + 2) % allBranches.length],
+    allBranches[(hash + 3) % allBranches.length]
+  ] : [];
+  
+  return {
+    basin,
+    mainRiver,
+    branches
+  };
+};

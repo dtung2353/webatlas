@@ -16,19 +16,29 @@ import {
   floodMockData,
   droughtSurveyMockData,
   saltwaterIntrusionMockData,
-  floodGenerationMockData
+  floodGenerationMockData,
+  getRelatedRivers
 } from '../data/mockData';
 import { fromLonLat, transformExtent } from 'ol/proj';
 
 const MapContainer: React.FC = () => {
   const mapElement = useRef<HTMLDivElement>(null);
-  const { setMap, basemap, layersState, reservoirFilter } = useMapContext();
+  const { setMap, basemap, layersState, reservoirFilter, highlightedRiverBasin } = useMapContext();
   const mapRef = useRef<Map | null>(null);
   const reservoirFilterRef = useRef(reservoirFilter);
+  const highlightedRiverBasinRef = useRef(highlightedRiverBasin);
 
   useEffect(() => {
     reservoirFilterRef.current = reservoirFilter;
   }, [reservoirFilter]);
+
+  useEffect(() => {
+    highlightedRiverBasinRef.current = highlightedRiverBasin;
+    const riversLayer = layersRef.current['layer_rivers'];
+    if (riversLayer) {
+      riversLayer.changed();
+    }
+  }, [highlightedRiverBasin]);
   
   // Layer refs
   const basemapLayerRef = useRef<TileLayer<XYZ | OSM> | null>(null);
@@ -138,6 +148,10 @@ const MapContainer: React.FC = () => {
     // Style cho mạng lưới sông ngòi động dựa trên cấp độ sông (Cap)
     const riversStyle = (feature: any) => {
       const cap = feature.get('Cap') || 6;
+      const id = feature.get('OBJECTID') || feature.get('Ma');
+      const name = feature.get('Vietnamese') || feature.get('Ten') || feature.get('name') || 'Sông';
+      const basin = getRelatedRivers(id, name).basin;
+      const isRelatedHighlight = highlightedRiverBasinRef.current && highlightedRiverBasinRef.current === basin;
       
       // Sông cấp nhỏ thì nét nhỏ nhạt, cấp lớn thì nét dày rõ
       let mainWidth = 0.5;
@@ -155,6 +169,17 @@ const MapContainer: React.FC = () => {
       } else {
         mainWidth = 0.5;
         borderWidth = 1.5;
+      }
+      
+      if (isRelatedHighlight) {
+        return [
+          new Style({
+            stroke: new Stroke({ color: '#22d3ee', width: borderWidth + 6 }) // Viền cyan sáng để báo hiệu liên quan
+          }),
+          new Style({
+            stroke: new Stroke({ color: '#ffffff', width: mainWidth + 2 }) // Lõi trắng
+          })
+        ];
       }
       
       return [
@@ -347,11 +372,13 @@ const MapContainer: React.FC = () => {
         floodGenerationLayer
       ],
       view: new View({
-        center: fromLonLat([106.0, 16.0]),
-        zoom: 6,
-        minZoom: 4.0,
+        // Tọa độ trung tâm khu vực Duyên hải Nam Trung Bộ và Tây Nguyên
+        center: fromLonLat([108.4, 13.6]),
+        zoom: 6.5,
+        minZoom: 5.5,
         maxZoom: 20,
-        extent: transformExtent([100.0, 8.0, 115.0, 24.0], 'EPSG:4326', 'EPSG:3857'),
+        // Giới hạn bản đồ chỉ hiển thị trong khu vực này
+        extent: transformExtent([106.8, 10.0, 110.0, 16.7], 'EPSG:4326', 'EPSG:3857'),
       }),
       controls: []
     });

@@ -17,6 +17,8 @@ interface DamDetails {
   thamNhe: string;
 }
 
+import { getRelatedRivers } from '../data/mockData';
+
 const getDetailedDamInfo = (id: number, name: string, wattage?: number): DamDetails => {
   const hash = id || name.length || 1;
   const loai = (hash % 4 === 0) ? 'Đập phụ' : 'Đập chính';
@@ -75,8 +77,10 @@ const getDetailedDamInfo = (id: number, name: string, wattage?: number): DamDeta
   };
 };
 
+
+
 const DynamicPopup: React.FC = () => {
-  const { map, reservoirFilter, setReservoirFilter, popupData, setPopupData } = useMapContext();
+  const { map, reservoirFilter, setReservoirFilter, popupData, setPopupData, highlightedRiverBasin, setHighlightedRiverBasin } = useMapContext();
   const [pixel, setPixel] = useState<number[]>([0, 0]);
   const [detailedDam, setDetailedDam] = useState<any | null>(null);
 
@@ -110,8 +114,10 @@ const DynamicPopup: React.FC = () => {
         });
         // Pan the map to the clicked feature so the popup stays in viewport
         map.getView().animate({ center: e.coordinate, duration: 400 });
+        setHighlightedRiverBasin(null); // Clear previous highlight
       } else {
         setPopupData(null);
+        setHighlightedRiverBasin(null);
       }
     };
 
@@ -229,6 +235,9 @@ const DynamicPopup: React.FC = () => {
       const lengthStr = props.Chieu_dai !== undefined 
         ? `${(props.Chieu_dai / 1000).toFixed(2)} km` 
         : props.length;
+        
+      const relatedRivers = getRelatedRivers(props.OBJECTID || props.Ma, props.Vietnamese || props.Ten || props.name || 'Sông');
+
       return (
         <>
           {props.Ma && (
@@ -253,6 +262,37 @@ const DynamicPopup: React.FC = () => {
               <span>Lưu lượng: <strong>{props.discharge}</strong></span>
             </div>
           )}
+          
+          <div className="diagrammatic-info" style={{ marginTop: '12px' }}>
+            <div className="title" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Droplets size={14} className="text-blue-500" />
+              Thông tin mạng lưới thủy hệ:
+            </div>
+            <ul style={{ marginTop: '4px' }}>
+              <li><strong>Lưu vực:</strong> {relatedRivers.basin}</li>
+              {relatedRivers.mainRiver ? (
+                <li><strong>Nhánh của:</strong> {relatedRivers.mainRiver}</li>
+              ) : (
+                <li><strong>Vai trò:</strong> Sông chính trong hệ thống</li>
+              )}
+              {relatedRivers.branches.length > 0 && (
+                <li><strong>Sông nhánh/Phụ lưu:</strong> {relatedRivers.branches.join(', ')}</li>
+              )}
+            </ul>
+            <button 
+              className={`filter-btn-tag mt-2 ${highlightedRiverBasin === relatedRivers.basin ? 'active-filter' : ''}`}
+              onClick={() => {
+                if (highlightedRiverBasin === relatedRivers.basin) {
+                  setHighlightedRiverBasin(null);
+                } else {
+                  setHighlightedRiverBasin(relatedRivers.basin);
+                }
+              }}
+              style={{ width: '100%', padding: '6px' }}
+            >
+              {highlightedRiverBasin === relatedRivers.basin ? 'Ẩn các sông liên quan' : 'Hiển thị các sông liên quan'}
+            </button>
+          </div>
         </>
       );
     }
@@ -469,7 +509,10 @@ const DynamicPopup: React.FC = () => {
       >
         <button 
           className="close-popup-btn" 
-          onClick={() => setPopupData(null)}
+          onClick={() => {
+            setPopupData(null);
+            setHighlightedRiverBasin(null);
+          }}
         >
           <X size={16} />
         </button>
