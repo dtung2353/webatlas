@@ -1,32 +1,10 @@
-# React + TypeScript + Vite
+# webatlas - WebGIS Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This project is built using React, TypeScript, Vite, MapServer, and PostGIS Docker containers.
 
-Currently, two official plugins are available:
+## Features & Tech Stack
+- **Frontend**: React + TypeScript + Vite
+- **Map Engine**: OpenLayers / MapServer
+- **Database**: PostgreSQL + PostGIS (Docker)
+- **Deployment**: Docker & Docker Compose
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
