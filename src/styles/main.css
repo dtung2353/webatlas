@@ -525,18 +525,34 @@ body {
   position: absolute;
   bottom: 24px;
   right: 24px;
-  padding: 16px;
-  min-width: 160px;
+  padding: 14px 16px;
+  min-width: 180px;
+  max-width: 300px;
+  max-height: 55vh;
+  overflow-y: auto;
+  z-index: 15;
+  transition: all 0.3s ease;
+}
+
+.dynamic-legend.collapsed {
+  padding: 10px 14px;
+  overflow: hidden;
 }
 
 .legend-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
   color: var(--text-main);
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.dynamic-legend.collapsed .legend-header {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .legend-content {
@@ -555,6 +571,8 @@ body {
   width: 16px;
   height: 16px;
   display: inline-block;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .legend-label {
@@ -565,10 +583,10 @@ body {
 /* OGC Client */
 .ogc-trigger-btn {
   position: absolute;
-  bottom: 80px;
-  right: 24px;
-  width: 40px;
-  height: 40px;
+  bottom: 24px;
+  right: 330px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -577,6 +595,7 @@ body {
   cursor: pointer;
   color: var(--primary);
   box-shadow: var(--glass-shadow);
+  z-index: 15;
   transition: all 0.2s;
 }
 

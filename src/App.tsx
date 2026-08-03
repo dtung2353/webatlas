@@ -1,13 +1,26 @@
+/**
+ * @file App.tsx
+ * @directory src
+ * @description Thành phần Root Layout chính cho ứng dụng WebAtlas kết nối Controller và các Views theo mô hình MVC.
+ * 
+ * Chức năng chính: Khung Giao diện Ứng dụng Chính (MVC Root Layout Container)
+ * Các chức năng nhỏ:
+ * - Bao bọc toàn bộ ứng dụng trong `MapProvider` (Controller trung tâm).
+ * - Kết nối các Views chính: MapView, MapControlsView, LayerTreeView, BasemapSwitcherView, SearchBarView, DynamicLegendView, OGCClientView, PDFExportButtonView, DynamicPopupView.
+ * - Nút bật/tắt hiển thị ẩn các bảng giao diện (Toggle UI panels visibility).
+ */
+
 import { useState } from 'react';
-import { MapProvider } from './components/MapContext';
-import MapContainer from './components/MapContainer';
-import BasemapSwitcher from './components/BasemapSwitcher';
-import LayerTree from './components/LayerTree';
-import MapControls from './components/MapControls';
-import SearchBar from './components/SearchBar';
-import DynamicPopup from './components/DynamicPopup';
-import DynamicLegend from './components/DynamicLegend';
-import OGCClient from './components/OGCClient';
+import { MapProvider } from './controllers/MapController';
+import MapView from './views/map/MapView';
+import BasemapSwitcherView from './views/layers/BasemapSwitcherView';
+import LayerTreeView from './views/layers/LayerTreeView';
+import MapControlsView from './views/map/MapControlsView';
+import SearchBarView from './views/search/SearchBarView';
+import DynamicPopupView from './views/popup/DynamicPopupView';
+import DynamicLegendView from './views/popup/DynamicLegendView';
+import OGCClientView from './views/ogc/OGCClientView';
+import PDFExportButtonView from './views/export/PDFExportButtonView';
 import { PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 import './styles/main.css';
 
@@ -17,23 +30,26 @@ function App() {
   return (
     <MapProvider>
       <div className="app-container">
-        <MapContainer />
+        {/* Khung bản đồ chính OpenLayers (View) */}
+        <MapView />
 
-        {/* MapControls luôn hiển thị (góc trên cùng bên phải) */}
-        <MapControls />
+        {/* Thanh công cụ tương tác bản đồ (View) */}
+        <MapControlsView />
 
-        {/* Các panel có thể ẩn/hiện */}
+        {/* Các bảng quản lý giao diện có thể ẩn/hiện (Views) */}
         <div className={`panels-wrapper ${panelsVisible ? '' : 'hidden'}`}>
-          <LayerTree />
-          <BasemapSwitcher />
-          <SearchBar />
-          <DynamicLegend />
-          <OGCClient />
+          <LayerTreeView />
+          <BasemapSwitcherView />
+          <SearchBarView />
+          <DynamicLegendView />
+          <OGCClientView />
+          <PDFExportButtonView />
         </div>
 
-        <DynamicPopup />
+        {/* Cửa sổ Popup hiển thị thông tin đối tượng click (View) */}
+        <DynamicPopupView />
 
-        {/* Nút ẩn/hiện các panel */}
+        {/* Nút ẩn/hiện giao diện các panel */}
         <button
           className="toggle-panels-btn glass-panel"
           onClick={() => setPanelsVisible(!panelsVisible)}

@@ -1,0 +1,49 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - mapserver
+    networks:
+      - webatlas_net
+
+  mapserver:
+    image: camptocamp/mapserver:7.6
+    ports:
+      - "8081:80"
+    volumes:
+      - ./mapserver:/etc/mapserver
+      - ./mapserver/Du_An_WebAtlas_Nhom:/data
+    environment:
+      - MS_MAPFILE=/etc/mapserver/atlas.map
+      - MS_DEBUGLEVEL=3
+    restart: unless-stopped
+    depends_on:
+      - postgis
+    networks:
+      - webatlas_net
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: gis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - webatlas_net
+
+networks:
+  webatlas_net:
+    driver: bridge
+
+volumes:
+  postgis_data:
