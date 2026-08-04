@@ -5,8 +5,8 @@
  * 
  * Chức năng chính: View Nút bấm & Modal Xuất Báo cáo PDF (PDF Export UI Control View)
  * Các chức năng nhỏ:
- * - Nút bấm kích hoạt Modal cấu hình báo cáo.
- * - Nhập Tiêu đề báo cáo, Đơn vị phát hành và Ghi chú thêm.
+ * - Nút bấm nổi Glassmorphism đồng bộ với các công cụ bản đồ khác.
+ * - Modal tùy chỉnh Tiêu đề báo cáo, Đơn vị phát hành và Ghi chú thêm.
  * - Gọi Controller `useExportController` để khởi chạy tiến trình xuất file PDF.
  */
 
@@ -37,29 +37,27 @@ const PDFExportButtonView: React.FC = () => {
   return (
     <>
       <button 
-        className="ogc-trigger-btn glass-panel text-blue-600"
+        className="export-pdf-trigger-btn glass-panel"
         onClick={() => setShowModal(true)}
         title="Xuất Báo cáo PDF Bản đồ & Thống kê"
-        style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.3)', cursor: 'pointer', background: 'var(--panel-bg, rgba(255, 255, 255, 0.85))', backdropFilter: 'blur(8px)' }}
       >
-        <FileText size={18} className="text-blue-500" />
-        <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-main, #1e293b)' }}>Xuất PDF</span>
+        <FileText size={18} />
       </button>
 
       {showModal && (
         <div className="ogc-modal-overlay" onClick={() => !isExporting && setShowModal(false)}>
-          <div className="ogc-modal glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '460px' }}>
+          <div className="ogc-modal glass-panel" onClick={(e) => e.stopPropagation()}>
             <div className="ogc-modal-header">
-              <h3 className="font-semibold flex items-center gap-2 text-blue-600">
+              <h3 className="font-semibold flex items-center gap-2 text-blue-500">
                 <FileText size={18} />
                 Cấu hình Xuất Báo cáo PDF
               </h3>
               <button onClick={() => !isExporting && setShowModal(false)} className="close-btn"><X size={18} /></button>
             </div>
             
-            <div className="ogc-modal-content" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="ogc-modal-content">
               <div className="input-group">
-                <label style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Tiêu đề Báo cáo (Không dấu)</label>
+                <label>Tiêu đề Báo cáo (Không dấu)</label>
                 <input 
                   type="text" 
                   value={reportTitle}
@@ -70,7 +68,7 @@ const PDFExportButtonView: React.FC = () => {
               </div>
 
               <div className="input-group">
-                <label style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Đơn vị phát hành (Không dấu)</label>
+                <label>Đơn vị phát hành (Không dấu)</label>
                 <input 
                   type="text" 
                   value={author}
@@ -81,22 +79,30 @@ const PDFExportButtonView: React.FC = () => {
               </div>
 
               <div className="input-group">
-                <label style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>Ghi chú thêm (Không dấu)</label>
+                <label>Ghi chú thêm (Không dấu)</label>
                 <textarea 
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Nhap ghi chu cho bao cao..."
                   rows={2}
                   disabled={isExporting}
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', resize: 'vertical' }}
+                  style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(255, 255, 255, 0.5)', outline: 'none', fontFamily: 'inherit', resize: 'vertical' }}
                 />
+              </div>
+
+              <div className="diagrammatic-info" style={{ marginBottom: '16px' }}>
+                <div className="title">Nội dung tệp PDF báo cáo:</div>
+                <ul>
+                  <li><strong>Bản đồ:</strong> Ảnh chụp hiện trạng thời gian thực</li>
+                  <li><strong>Chú giải:</strong> Ký hiệu các lớp dữ liệu đang bật</li>
+                  <li><strong>Thống kê:</strong> Biểu đồ trạng thái & công suất đập</li>
+                </ul>
               </div>
 
               <button 
                 className="add-layer-btn" 
                 onClick={onExportSubmit}
                 disabled={isExporting}
-                style={{ marginTop: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: '#2563eb', color: '#ffffff', border: 'none', padding: '10px', borderRadius: '6px', cursor: isExporting ? 'not-allowed' : 'pointer', fontWeight: 600 }}
               >
                 {isExporting ? (
                   <>
