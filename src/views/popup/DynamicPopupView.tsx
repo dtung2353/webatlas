@@ -68,7 +68,7 @@ const DynamicPopupView: React.FC = () => {
       }
 
       // 2. Truy vấn GetFeatureInfo WMS từ MapServer
-      const wmsLayerNames = ['thuydienvietnam', 'thuyhe', 'diaphantinh', 'gadm41_vnm_3'];
+      const wmsLayerNames = ['thuydienvietnam', 'thuyhe', 'hochua_thuyloi', 'danhsachhochua', 'diaphantinh', 'gadm41_vnm_3'];
       const view = map.getView();
       const size = map.getSize();
       
@@ -138,8 +138,14 @@ const DynamicPopupView: React.FC = () => {
 
   const props = popupData.feature;
 
-  const isDamOrReservoir = props.Wattage_PL !== undefined || (props.capacity !== undefined && props.basin !== undefined);
-  const detail = isDamOrReservoir ? getDetailedDamInfo(props.ID || props.id, props.Vietnamese || props.Ten || props.name || 'Đập & Hồ chứa', props.Wattage_PL) : null;
+  const isDamOrReservoir = 
+    props.Wattage_PL !== undefined || 
+    (props.capacity !== undefined && props.basin !== undefined) || 
+    props.water === 'reservoir' || 
+    props.fclass === 'water' || 
+    (props._layerName && (props._layerName.includes('hochua') || props._layerName.includes('thuydien')));
+
+  const detail = isDamOrReservoir ? getDetailedDamInfo(props.ID || props.id || props.osm_id, props.Vietnamese || props.name || props.Ten || 'Đập & Hồ chứa', props.Wattage_PL) : null;
 
   let popupLeft = pixel[0] + 15;
   let popupTop = pixel[1] - 15;
@@ -156,7 +162,7 @@ const DynamicPopupView: React.FC = () => {
     yTranslate = '0';
   }
 
-  const popupTitle = props.adm1_name || props.ten_tinh || props.NAME_3 || props.NAME_1 || props.Vietnamese || props.Ten || props.name || (props.OBJECTID ? `Sông ngòi (ID: ${props.OBJECTID})` : (props._layerName ? `${props._layerName}` : 'Đối tượng không tên'));
+  const popupTitle = props.Vietnamese || props.adm1_name1 || props.adm1_name || props.name || props.Ten || props.NAME_3 || props.NAME_1 || (props.OBJECTID ? `Sông ngòi (ID: ${props.OBJECTID})` : (props._layerName ? `${props._layerName}` : 'Đối tượng không tên'));
 
   const renderContent = () => {
     if (isDamOrReservoir) {

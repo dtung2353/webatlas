@@ -14,30 +14,38 @@ export function parseGMLResponse(gmlText: string): Record<string, any> | null {
   try {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(gmlText, 'text/xml');
-    
-    const featureMembers = xmlDoc.getElementsByTagName('gml:featureMember');
-    const targetElement = featureMembers.length > 0 
-      ? featureMembers[0] 
-      : xmlDoc.querySelector('[class*="_layer"], [class*="_feature"]');
+    const allElements = Array.from(xmlDoc.querySelectorAll('*'));
 
+    // 1. Tìm thẻ feature (_feature hoặc featureMember)
+    let targetElement = allElements.find(el => {
+      const tag = (el.localName || el.tagName || '').toLowerCase();
+      return tag.endsWith('_feature') || tag === 'featuremember';
+    });
+
+    // 2. Nếu không thấy *_feature, tìm con bên trong *_layer
     if (!targetElement) {
-      const rootChildren = xmlDoc.documentElement.children;
-      if (rootChildren.length === 0) return null;
-      
-      for (let i = 0; i < rootChildren.length; i++) {
-        const child = rootChildren[i];
-        if (child.children.length > 0) {
-          const featureObj = extractElementProperties(child.children[0]);
-          if (Object.keys(featureObj).length > 0) return featureObj;
+      const layerElement = allElements.find(el => {
+        const tag = (el.localName || el.tagName || '').toLowerCase();
+        return tag.endsWith('_layer');
+      });
+
+      if (layerElement && layerElement.children.length > 0) {
+        for (let i = 0; i < layerElement.children.length; i++) {
+          const child = layerElement.children[i];
+          const tag = (child.localName || child.tagName || '').toLowerCase();
+          if (tag !== 'name' && tag !== 'boundedby' && !tag.includes('name')) {
+            targetElement = child;
+            break;
+          }
         }
       }
-      return null;
     }
 
-    const featureChild = targetElement.firstElementChild || targetElement;
-    const properties = extractElementProperties(featureChild);
-    
+    if (!targetElement) return null;
+
+    const properties = extractElementProperties(targetElement);
     if (Object.keys(properties).length === 0) return null;
+
     return properties;
   } catch (err) {
     console.warn('Lỗi phân tích cú pháp GML GetFeatureInfo:', err);

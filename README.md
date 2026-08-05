@@ -113,14 +113,24 @@ webatlas/
 Yêu cầu máy tính đã cài **Docker Desktop** (Windows/macOS) hoặc **Docker Engine** (Linux).
 
 1. Mở Terminal tại thư mục dự án `webatlas`.
-2. Chạy lệnh:
+2. **Khởi động Server:**
    ```bash
-   docker compose up -d --build
+   docker compose up -d
    ```
-3. Truy cập ứng dụng tại:
+   *(Hoặc `docker compose up -d --build` nếu muốn build lại ảnh Docker).*
+3. **Kiểm tra trạng thái Server:**
+   ```bash
+   docker ps
+   ```
+   *(Dùng để kiểm tra xem các container server đã chạy thành công hay chưa).*
+4. Truy cập ứng dụng tại:
    * Giao diện WebAtlas: `http://localhost`
    * Dịch vụ MapServer: `http://localhost:8081/`
    * Cơ sở dữ liệu PostGIS: `localhost:5432` (`User: postgres` | `Pass: postgres` | `DB: gis`)
+
+5. **Các lệnh quản lý Docker thường dùng:**
+   * **Để Tắt MapServer:** Gõ lệnh `docker compose stop` (tạm dừng) hoặc `docker compose down` (tắt và xóa container hiện tại, không xóa dữ liệu của bạn).
+   * **Để Khởi động lại (khi bạn sửa file cấu hình):** Gõ lệnh `docker compose restart`.
 
 ### Cách 2: Khởi chạy ở chế độ Phát triển (Dev Mode)
 Yêu cầu đã cài **Node.js (v18+)**.
