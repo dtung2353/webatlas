@@ -90,15 +90,6 @@ const PDFExportButtonView: React.FC = () => {
                 />
               </div>
 
-              <div className="diagrammatic-info" style={{ marginBottom: '16px' }}>
-                <div className="title">Nội dung tệp PDF báo cáo:</div>
-                <ul>
-                  <li><strong>Bản đồ:</strong> Ảnh chụp hiện trạng thời gian thực</li>
-                  <li><strong>Chú giải:</strong> Ký hiệu các lớp dữ liệu đang bật</li>
-                  <li><strong>Thống kê:</strong> Biểu đồ trạng thái & công suất đập</li>
-                </ul>
-              </div>
-
               <button 
                 className="add-layer-btn" 
                 onClick={onExportSubmit}
