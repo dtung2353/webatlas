@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import { useMapController } from './useMapController';
 import { fromLonLat } from 'ol/proj';
 import { getCenter } from 'ol/extent';
-import { buildMapServerUrl } from '../models/appConfig';
+import { MapServerService } from '../services/MapServerService';
 
 export const useSearchController = () => {
   const { map, setPopupData } = useMapController();
@@ -25,8 +25,8 @@ export const useSearchController = () => {
 
   // Tải danh sách các đập thủy điện từ MapServer WFS (GML format)
   useEffect(() => {
-    const wfsUrl = buildMapServerUrl('SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuydienvietnam&MAXFEATURES=50');
-    
+    const wfsUrl = MapServerService.buildUrl('SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuydienvietnam&MAXFEATURES=50');
+
     fetch(wfsUrl)
       .then(res => res.text())
       .then(xmlText => {
@@ -34,7 +34,7 @@ export const useSearchController = () => {
         const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
         const members = xmlDoc.getElementsByTagName('gml:featureMember');
         const dams: any[] = [];
-        
+
         for (let i = 0; i < members.length; i++) {
           const member = members[i];
           const featureEl = member.firstElementChild;
@@ -81,7 +81,7 @@ export const useSearchController = () => {
             }
           }
         }
-        
+
         if (dams.length > 0) {
           setDefaultDams(dams);
           setResults(dams);

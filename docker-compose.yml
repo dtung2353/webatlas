@@ -16,7 +16,7 @@ services:
     ports:
       - "8081:80"
     volumes:
-      - ./mapserver:/etc/mapserver
+      - ./mapserver/config:/etc/mapserver
       - ./mapserver/Du_An_WebAtlas_Nhom:/data
     environment:
       - MS_MAPFILE=/etc/mapserver/atlas.map

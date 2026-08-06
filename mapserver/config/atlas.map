@@ -1,0 +1,121 @@
+MAP
+  NAME "webatlas"
+  EXTENT 101 8 110 23.5
+  UNITS DD
+  IMAGECOLOR 255 255 255
+  SHAPEPATH "/data"
+
+  WEB
+    METADATA
+      "wms_title" "WebAtlas"
+      "wms_onlineresource" "http://localhost:8081/?"
+      "wms_enable_request" "*"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+      "wfs_enable_request" "*"
+    END
+  END
+
+  PROJECTION
+    "init=epsg:4326"
+  END
+
+  LAYER
+    NAME "diaphantinh"
+    TYPE POLYGON
+    CONNECTIONTYPE OGR
+    CONNECTION "/data/webatlas.gpkg"
+    DATA "01_BienGioiQuocGia"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "diaphantinh"
+      "wms_name" "diaphantinh"
+      "wms_srs" "EPSG:4326"
+      "gml_include_items" "all"
+    END
+    CLASS
+      STYLE
+        COLOR 230 230 230
+        OUTLINECOLOR 120 120 120
+        WIDTH 1
+      END
+    END
+  END
+
+  LAYER
+    NAME "gadm41_vnm_3"
+    TYPE POLYGON
+    CONNECTIONTYPE OGR
+    CONNECTION "/data/webatlas.gpkg"
+    DATA "02_BienGioiTinh"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "gadm41_vnm_3"
+      "wms_name" "gadm41_vnm_3"
+      "wms_srs" "EPSG:4326"
+      "gml_include_items" "all"
+    END
+    CLASS
+      STYLE
+        COLOR 245 245 245
+        OUTLINECOLOR 160 160 160
+        WIDTH 0.5
+      END
+    END
+  END
+
+  LAYER
+    NAME "thuyhe"
+    TYPE LINE
+    CONNECTIONTYPE OGR
+    CONNECTION "/data/webatlas.gpkg"
+    DATA "03_SongSuoi"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "thuyhe"
+      "wms_name" "thuyhe"
+      "wms_srs" "EPSG:4326"
+      "gml_include_items" "all"
+    END
+    CLASS
+      STYLE
+        COLOR 14 165 233
+        WIDTH 1.5
+      END
+    END
+  END
+
+  LAYER
+    NAME "thuydienvietnam"
+    TYPE POINT
+    CONNECTIONTYPE OGR
+    CONNECTION "/data/webatlas.gpkg"
+    DATA "04_HoChua_Dap"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "thuydienvietnam"
+      "wms_name" "thuydienvietnam"
+      "wms_srs" "EPSG:4326"
+      "gml_include_items" "all"
+    END
+    CLASS
+      STYLE
+        SYMBOL "circle"
+        COLOR 16 185 129
+        OUTLINECOLOR 255 255 255
+        SIZE 6
+      END
+    END
+  END
+END

@@ -35,7 +35,8 @@ import {
   floodGenerationMockData
 } from '../../models/mockData';
 import { parseGMLCoordinates } from '../../models/gmlParser';
-import { MAPSERVER_URL, buildMapServerUrl } from '../../models/appConfig';
+import { MAPSERVER_URL } from '../../shared/config/mapServer';
+import { MapServerService } from '../../services/MapServerService';
 
 const MapView: React.FC = () => {
   const mapElement = useRef<HTMLDivElement>(null);
@@ -278,7 +279,7 @@ const MapView: React.FC = () => {
           const [lon, lat] = toLonLat(popupData.coordinate);
           const delta = 0.08;
           const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
-          const wfsUrl = buildMapServerUrl(`SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuyhe&OUTPUTFORMAT=gml2&BBOX=${bbox}&MAXFEATURES=10`);
+          const wfsUrl = MapServerService.buildUrl(`SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuyhe&OUTPUTFORMAT=gml2&BBOX=${bbox}&MAXFEATURES=10`);
 
           const response = await fetch(wfsUrl);
           if (response.ok) {
@@ -315,7 +316,7 @@ const MapView: React.FC = () => {
           const [lon, lat] = toLonLat(popupData.coordinate);
           const delta = 0.6;
           const bbox = `${lon - delta},${lat - delta},${lon + delta},${lat + delta}`;
-          const wfsUrl = buildMapServerUrl(`SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuyhe&OUTPUTFORMAT=gml2&BBOX=${bbox}&MAXFEATURES=150`);
+          const wfsUrl = MapServerService.buildUrl(`SERVICE=WFS&VERSION=1.0.0&REQUEST=GetFeature&TYPENAME=thuyhe&OUTPUTFORMAT=gml2&BBOX=${bbox}&MAXFEATURES=150`);
 
           const response = await fetch(wfsUrl);
           if (response.ok) {

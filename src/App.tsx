@@ -63,4 +63,4 @@ function App() {
   );
 }
 
-export default App;
+export { App as default };
