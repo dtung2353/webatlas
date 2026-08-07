@@ -5,23 +5,22 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"
-    restart: unless-stopped
+    restart: always
     depends_on:
       - mapserver
     networks:
       - webatlas_net
 
   mapserver:
-    image: camptocamp/mapserver:7.6
+    build:
+      context: ./mapserver
+      dockerfile: Dockerfile
     ports:
       - "8081:80"
-    volumes:
-      - ./mapserver/config:/etc/mapserver
-      - ./mapserver/Du_An_WebAtlas_Nhom:/data
     environment:
       - MS_MAPFILE=/etc/mapserver/atlas.map
       - MS_DEBUGLEVEL=3
-    restart: unless-stopped
+    restart: always
     depends_on:
       - postgis
     networks:
@@ -37,7 +36,7 @@ services:
       - "5432:5432"
     volumes:
       - postgis_data:/var/lib/postgresql/data
-    restart: unless-stopped
+    restart: always
     networks:
       - webatlas_net
 
