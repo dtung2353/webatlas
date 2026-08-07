@@ -1,9 +1,18 @@
--- SQL Script Khởi tạo PostGIS Database cho WebAtlas
--- Tự động chạy khi Docker container PostGIS khởi động lần đầu
+-- =============================================================
+-- WebAtlas GIS - PostGIS Initial Spatial Database Setup Script
+-- Automatically loaded on initial PostGIS container startup via
+-- /docker-entrypoint-initdb.d/init-db.sql
+-- =============================================================
 
+-- Enable PostGIS spatial extension
 CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS postgis_topology;
 
--- 1. Bảng Ranh giới Tỉnh (bien_gioi_tinh)
+-- -------------------------------------------------------------
+-- BẢNG DỮ LIỆU ĐỊA LÝ & THUỘC TÍNH (SPATIAL SCHEMAS)
+-- -------------------------------------------------------------
+
+-- 1. Bảng Ranh giới Tỉnh/Thành phố (bien_gioi_tinh)
 DROP TABLE IF EXISTS bien_gioi_tinh CASCADE;
 CREATE TABLE bien_gioi_tinh (
     id SERIAL PRIMARY KEY,
