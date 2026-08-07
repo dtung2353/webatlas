@@ -26,4 +26,5 @@ dist-ssr
 # Exclude data directory
 /data/
 sapnhapbando_geojson/
-geojson_11Mar2026/
+geojson_11Mar2026/mapserver/Du_An_WebAtlas_Nhom/05_DEM.tif
+mapserver/Du_An_WebAtlas_Nhom/06_HillShade.tif

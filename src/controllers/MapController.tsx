@@ -15,13 +15,14 @@
 
 import React, { createContext, useState, type ReactNode } from 'react';
 import { Map } from 'ol';
-import { layerGroups } from '../models/layerConfig';
-import type { 
-  BasemapType, 
-  ReservoirFilterType, 
-  LayerState, 
-  PopupData 
-} from '../models/mapTypes';
+import { layerGroups } from '../shared/config/layerConfig';
+import type {
+  BasemapType,
+  ReservoirFilterType,
+  LayerState,
+  PopupData
+} from '../shared/types/map';
+import { LayerStateModel } from '../models/map/LayerStateModel';
 
 export type { BasemapType, ReservoirFilterType, LayerState, PopupData };
 
@@ -58,32 +59,24 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [reservoirFilter, setReservoirFilter] = useState<ReservoirFilterType>('all');
   const [popupData, setPopupData] = useState<PopupData | null>(null);
   const [highlightedRiverBasin, setHighlightedRiverBasin] = useState<string | null>(null);
-  
-  // Khởi tạo trạng thái lớp dữ liệu dựa trên cấu hình layerGroups
-  const initialLayersState: LayerState[] = [];
-  layerGroups.forEach(group => {
-    group.layers.forEach(layer => {
-      initialLayersState.push({
-        id: layer.id,
-        visible: layer.defaultVisible,
-        opacity: layer.opacity
-      });
-    });
-  });
 
-  const [layersState, setLayersState] = useState<LayerState[]>(initialLayersState);
+  const [layersState, setLayersState] = useState<LayerState[]>(
+    () => layerGroups.flatMap(group => 
+      group.layers.map(layer => new LayerStateModel(layer.id, layer.defaultVisible, layer.opacity))
+    )
+  );
 
   /** Chuyển đổi trạng thái bật/tắt của 1 lớp */
   const toggleLayerVisibility = (layerId: string) => {
     setLayersState(prev => prev.map(layer => 
-      layer.id === layerId ? { ...layer, visible: !layer.visible } : layer
+      layer.id === layerId ? new LayerStateModel(layer.id, !layer.visible, layer.opacity) : layer
     ));
   };
 
   /** Chỉnh sửa độ mờ (opacity) của 1 lớp */
   const setLayerOpacity = (layerId: string, opacity: number) => {
     setLayersState(prev => prev.map(layer => 
-      layer.id === layerId ? { ...layer, opacity } : layer
+      layer.id === layerId ? new LayerStateModel(layer.id, layer.visible, opacity) : layer
     ));
   };
 
