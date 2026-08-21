@@ -1,4 +1,13 @@
+# ==============================================================================
+# Docker Compose: Cấu hình Container Orchestration cho Hệ thống WebAtlas GIS
+# Các dịch vụ bao gồm:
+# - web: Nginx Frontend Web Application (React Vite Single Page App)
+# - mapserver: MapServer OGC WMS/WFS Map Engine CGI
+# - postgis: Cơ sở dữ liệu Không gian PostgreSQL/PostGIS
+# ==============================================================================
+
 services:
+  # Dịch vụ Frontend UI Nginx Web Server
   web:
     build:
       context: .
@@ -11,6 +20,7 @@ services:
     networks:
       - webatlas_net
 
+  # Dịch vụ Máy chủ Bản đồ MapServer OGC WMS/WFS CGI Engine
   mapserver:
     build:
       context: ./mapserver
@@ -19,6 +29,7 @@ services:
       - "8081:80"
     volumes:
       - ./mapserver/config:/etc/mapserver
+      - ./processed:/data/processed:ro
     environment:
       - MS_MAPFILE=/etc/mapserver/atlas.map
       - MS_DEBUGLEVEL=3
@@ -28,6 +39,7 @@ services:
     networks:
       - webatlas_net
 
+  # Dịch vụ Cơ sở dữ liệu Không gian PostGIS PostgreSQL
   postgis:
     image: postgis/postgis:16-3.4
     environment:
@@ -43,9 +55,11 @@ services:
     networks:
       - webatlas_net
 
+# Mạng kết nối nội bộ giữa các container Docker
 networks:
   webatlas_net:
     driver: bridge
 
+# Khối lưu trữ dữ liệu bền vững cho cơ sở dữ liệu PostGIS
 volumes:
   postgis_data:

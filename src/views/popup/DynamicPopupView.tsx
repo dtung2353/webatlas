@@ -21,6 +21,7 @@ import { parseGMLResponse } from '../../models/gmlPopupParser';
 import { getDetailedDamInfo } from '../../models/damDetailHelper';
 import DamDetailModalView from './DamDetailModalView';
 import DamPopupContentView from './sub-popups/DamPopupContentView';
+import LakePopupContentView from './sub-popups/LakePopupContentView';
 import RiverPopupContentView from './sub-popups/RiverPopupContentView';
 import AdminPopupContentView from './sub-popups/AdminPopupContentView';
 import GenericPopupContentView from './sub-popups/GenericPopupContentView';
@@ -68,7 +69,18 @@ const DynamicPopupView: React.FC = () => {
       }
 
       // 2. Truy vấn GetFeatureInfo WMS từ MapServer
-      const wmsLayerNames = ['thuydienvietnam', 'thuyhe', 'hochua_thuyloi', 'danhsachhochua', 'diaphantinh', 'gadm41_vnm_3'];
+      const wmsLayerNames = [
+        'thuydienvietnam', 
+        'dia_diem_dan_cu',
+        'ho_mat_nuoc', 
+        'duong_sat_viet_nam',
+        'giao_thong_duong_di',
+        'thuyhe', 
+        'hochua_thuyloi', 
+        'danhsachhochua', 
+        'diaphantinh', 
+        'gadm41_vnm_3'
+      ];
       const view = map.getView();
       const size = map.getSize();
       
@@ -138,14 +150,28 @@ const DynamicPopupView: React.FC = () => {
 
   const props = popupData.feature;
 
-  const isDamOrReservoir = 
+  const isDam = Boolean(
+    props.ten_cong_trinh !== undefined || 
+    props.cong_suat_mw !== undefined || 
     props.Wattage_PL !== undefined || 
+    props.power !== undefined || 
     (props.capacity !== undefined && props.basin !== undefined) || 
-    props.water === 'reservoir' || 
-    props.fclass === 'water' || 
-    (props._layerName && (props._layerName.includes('hochua') || props._layerName.includes('thuydien')));
+    (props._layerName && (props._layerName.includes('thuydien') || props._layerName.includes('dap')))
+  );
 
-  const detail = isDamOrReservoir ? getDetailedDamInfo(props.ID || props.id || props.osm_id, props.Vietnamese || props.name || props.Ten || 'Đập & Hồ chứa', props.Wattage_PL) : null;
+  const isLake = Boolean(
+    !isDam && (
+      props.fclass !== undefined || 
+      props.water === 'reservoir' || 
+      (props._layerName && props._layerName.includes('ho_mat_nuoc'))
+    )
+  );
+
+  const detail = isDam ? getDetailedDamInfo(
+    props.ID || props.id || props.osm_id || props.fid, 
+    props.ten_cong_trinh || props.Vietnamese || props.name || props.Ten || 'Đập & Hồ chứa', 
+    props.cong_suat_mw || props.Wattage_PL
+  ) : null;
 
   let popupLeft = pixel[0] + 15;
   let popupTop = pixel[1] - 15;
@@ -162,16 +188,99 @@ const DynamicPopupView: React.FC = () => {
     yTranslate = '0';
   }
 
-  const popupTitle = props.Vietnamese || props.adm1_name1 || props.adm1_name || props.name || props.Ten || props.NAME_3 || props.NAME_1 || (props.OBJECTID ? `Sông ngòi (ID: ${props.OBJECTID})` : (props._layerName ? `${props._layerName}` : 'Đối tượng không tên'));
+  const getPopupTitle = (featureProps: Record<string, any>): string => {
+    if (!featureProps) return 'Đối tượng không tên';
+
+    // 1. Kiểm tra các trường tên phổ biến
+    const directName = 
+      featureProps.ten_cong_trinh || 
+      featureProps.ten_tram || 
+      featureProps.ten_vung || 
+      featureProps.ten_diem || 
+      featureProps.ten_luu_vuc || 
+      featureProps.ten || 
+      featureProps.Vietnamese || 
+      featureProps.name || 
+      featureProps.Ten || 
+      featureProps.fullName || 
+      featureProps.full_name || 
+      featureProps.adm1_name || 
+      featureProps.adm1_name1 || 
+      featureProps.NAME_3 || 
+      featureProps.NAME_2 || 
+      featureProps.NAME_1 || 
+      featureProps.NAME_0 || 
+      featureProps.adm0_name;
+
+    if (directName && typeof directName === 'string' && directName.trim()) {
+      return directName.trim();
+    }
+
+    // 2. Tìm kiếm thuộc tính dạng chuỗi có chứa tên/name
+    for (const [key, value] of Object.entries(featureProps)) {
+      if (typeof value === 'string' && value.trim()) {
+        const lowerKey = key.toLowerCase();
+        if (lowerKey.includes('ten') || lowerKey.includes('name') || lowerKey.includes('label') || lowerKey.includes('title')) {
+          return value.trim();
+        }
+      }
+    }
+
+    // 3. Dự phòng tên theo loại lớp dữ liệu
+    const layer = String(featureProps._layerName || '').toLowerCase();
+    if (layer.includes('thuydien') || layer.includes('hochua') || layer.includes('dap')) {
+      return featureProps.fid ? `Công trình Đập & Hồ chứa #${featureProps.fid}` : 'Đập & Hồ chứa Thủy điện';
+    }
+    if (layer.includes('ho_mat_nuoc') || featureProps.fclass === 'water' || featureProps.fclass === 'reservoir') {
+      return featureProps.fid ? `Hồ mặt nước #${featureProps.fid}` : 'Hồ & Mặt nước';
+    }
+    if (layer.includes('dia_diem_dan_cu') || featureProps.population !== undefined) {
+      return featureProps.name || (featureProps.fid ? `Điểm dân cư #${featureProps.fid}` : 'Địa điểm dân cư');
+    }
+    if (layer.includes('duong_sat')) {
+      return featureProps.name || (featureProps.fid ? `Tuyến đường sắt #${featureProps.fid}` : 'Đường sắt Việt Nam');
+    }
+    if (layer.includes('giao_thong') || featureProps.maxspeed !== undefined || featureProps.oneway !== undefined) {
+      return featureProps.name || (featureProps.ref ? `Tuyến đường ${featureProps.ref}` : (featureProps.fid ? `Tuyến đường #${featureProps.fid}` : 'Tuyến giao thông đường bộ'));
+    }
+    if (layer.includes('thuyhe') || layer.includes('song')) {
+      return featureProps.fid ? `Phân đoạn Sông ngòi #${featureProps.fid}` : 'Hệ thống Sông ngòi';
+    }
+    if (layer.includes('tram')) {
+      return featureProps.fid ? `Trạm quan trắc #${featureProps.fid}` : 'Trạm quan trắc Thủy văn';
+    }
+    if (layer.includes('vung_ngap')) {
+      return featureProps.fid ? `Vùng ngập lụt #${featureProps.fid}` : 'Vùng Ngập lụt';
+    }
+    if (layer.includes('diaphantinh') || layer.includes('gadm') || layer.includes('bien_gioi')) {
+      return featureProps.fid ? `Đơn vị Hành chính #${featureProps.fid}` : 'Ranh giới Hành chính';
+    }
+
+    if (featureProps.OBJECTID) return `Sông ngòi (ID: ${featureProps.OBJECTID})`;
+    if (featureProps.fid) return `Đối tượng (ID: ${featureProps.fid})`;
+
+    return 'Chi tiết đối tượng bản đồ';
+  };
+
+  const popupTitle = getPopupTitle(props);
 
   const renderContent = () => {
-    if (isDamOrReservoir) {
+    if (isDam) {
       return <DamPopupContentView props={props} reservoirFilter={reservoirFilter} setReservoirFilter={setReservoirFilter} />;
     }
-    if (props.Chieu_dai !== undefined || props.length !== undefined || props._layerName === 'thuyhe' || props._layerName === 'song_vietnam') {
+    if (isLake) {
+      return <LakePopupContentView props={props} map={map} coordinate={popupData.coordinate} />;
+    }
+    if (
+      props.chieu_dai !== undefined || 
+      props.Chieu_dai !== undefined || 
+      props.length !== undefined || 
+      props.cap !== undefined || 
+      (props._layerName && (props._layerName.includes('thuyhe') || props._layerName.includes('song')))
+    ) {
       return <RiverPopupContentView props={props} highlightedRiverBasin={highlightedRiverBasin} setHighlightedRiverBasin={setHighlightedRiverBasin} />;
     }
-    if (props.truocsn !== undefined || props.NAME_1 !== undefined || props._layerName === 'diaphantinh' || props._layerName === 'gadm41_vnm_3' || props.ten_tinh !== undefined) {
+    if (props.truocsn !== undefined || props.NAME_1 !== undefined || (props._layerName && (props._layerName.includes('diaphantinh') || props._layerName.includes('gadm41') || props._layerName.includes('bien_gioi'))) || props.ten_tinh !== undefined) {
       return <AdminPopupContentView props={props} />;
     }
     return <GenericPopupContentView props={props} />;
@@ -214,7 +323,7 @@ const DynamicPopupView: React.FC = () => {
           {renderContent()}
         </div>
         
-        {isDamOrReservoir && (
+        {isDam && (
           <div className="popup-footer">
             <button className="details-btn" onClick={() => setDetailedDam(props)}>
               <Info size={16} />

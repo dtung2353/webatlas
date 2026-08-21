@@ -1,0 +1,4 @@
+sans /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+sans-bold /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+serif /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf
+serif-bold /usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf

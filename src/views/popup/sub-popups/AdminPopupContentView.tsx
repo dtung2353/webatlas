@@ -1,12 +1,18 @@
 /**
  * @file AdminPopupContentView.tsx
  * @directory src/views/popup/sub-popups
- * @description View hiển thị thuộc tính ranh giới đơn vị hành chính (Tỉnh, Huyện, Xã/Phường).
+ * @description Thành phần View con chuyên biệt hiển thị thuộc tính ranh giới đơn vị hành chính (Tỉnh/Thành phố, Quận/Huyện, Xã/Phường).
  * 
- * Chức năng chính: View Nội dung Popup Ranh giới Hành chính (Admin Boundary Popup Content View)
- * Các chức năng nhỏ:
- * - Hiển thị Tên đơn vị hành chính, tên đơn vị trực thuộc.
- * - Hiển thị thông tin đơn vị trước sáp nhập, mã đơn vị và phân loại đơn vị.
+ * Kiến trúc MVC: View Component (Popup Sub-View Layer)
+ * 
+ * Chi tiết chức năng:
+ * 1. Nhận dữ liệu thuộc tính đối tượng GIS từ OpenLayers Vector Feature hoặc MapServer GetFeatureInfo GML.
+ * 2. Phân loại thuộc tính linh hoạt theo các trường dữ liệu hành chính:
+ *    - Cấp Xã/Phường/Quận/Huyện/Tỉnh (`NAME_1`, `NAME_2`, `NAME_3`).
+ *    - Thông tin lịch sử đơn vị trước sáp nhập (`truocsn`).
+ *    - Phân loại đơn vị hành chính (`ENGTYPE_1`, `ENGTYPE_2`, `ENGTYPE_3`).
+ *    - Mã định danh hành chính PCode / GID (`adm1_pcode`, `code`, `gid`).
+ * 3. Render giao diện dạng danh sách thuộc tính chuẩn mỹ quan Glassmorphic kèm các Icon trợ trực quan.
  */
 
 import React from 'react';

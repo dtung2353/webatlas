@@ -13,7 +13,7 @@
 
 import React, { useState } from 'react';
 import { useMapController } from '../../controllers/useMapController';
-import { List, ChevronDown, ChevronUp } from 'lucide-react';
+import { List } from 'lucide-react';
 
 const DynamicLegendView: React.FC = () => {
   const { layersState } = useMapController();
@@ -24,24 +24,23 @@ const DynamicLegendView: React.FC = () => {
   if (visibleLayers.length === 0) return null;
 
   return (
-    <div className={`dynamic-legend glass-panel ${isCollapsed ? 'collapsed' : ''}`}>
-      <div 
-        className="legend-header cursor-pointer select-none"
+    <div className="top-left-legend-container">
+      {/* Nút ẩn/hiện các chú thích trên bản đồ (Chỉ giữ Icon) */}
+      <button 
+        className={`legend-toggle-btn glass-panel ${!isCollapsed ? 'active' : ''}`}
         onClick={() => setIsCollapsed(!isCollapsed)}
-        title={isCollapsed ? 'Mở rộng chú giải' : 'Thu gọn chú giải'}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+        title={isCollapsed ? 'Hiện chú thích bản đồ' : 'Ẩn chú thích bản đồ'}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <List size={16} />
-          <span className="font-semibold text-sm">Chú giải ({visibleLayers.length})</span>
-        </div>
-        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
-          {isCollapsed ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-        </button>
-      </div>
-      
+        <List size={18} />
+      </button>
+
+      {/* Bảng nội dung chú giải ký hiệu bản đồ */}
       {!isCollapsed && (
-        <div className="legend-content">
+        <div className="dynamic-legend-content glass-panel">
+          <div className="legend-header">
+            <span className="font-semibold text-xs text-gray-700 uppercase tracking-wider">Chú thích ký hiệu ({visibleLayers.length})</span>
+          </div>
+
         {visibleLayers.map(layer => {
           if (layer.id === 'layer_dams') {
             return (
@@ -90,11 +89,43 @@ const DynamicLegendView: React.FC = () => {
               </div>
             );
           }
+          if (layer.id === 'layer_lakes') {
+            return (
+              <div key={layer.id} className="legend-item">
+                <span className="legend-color-box" style={{ background: '#38bdf8', border: '1px solid #0ea5e9' }}></span>
+                <span className="legend-label">Hồ & Mặt nước</span>
+              </div>
+            );
+          }
           if (layer.id === 'layer_rivers') {
             return (
               <div key={layer.id} className="legend-item">
                 <span className="legend-color-box" style={{ background: '#0ea5e9', height: '3px' }}></span>
                 <span className="legend-label">Sông ngòi</span>
+              </div>
+            );
+          }
+          if (layer.id === 'layer_roads') {
+            return (
+              <div key={layer.id} className="legend-item">
+                <span className="legend-color-box" style={{ background: '#f59e0b', height: '2px' }}></span>
+                <span className="legend-label">Giao thông đường bộ</span>
+              </div>
+            );
+          }
+          if (layer.id === 'layer_railways') {
+            return (
+              <div key={layer.id} className="legend-item">
+                <span className="legend-color-box" style={{ background: '#4b5563', height: '2.5px', borderTop: '1px dashed #ffffff' }}></span>
+                <span className="legend-label">Đường sắt Việt Nam</span>
+              </div>
+            );
+          }
+          if (layer.id === 'layer_residential') {
+            return (
+              <div key={layer.id} className="legend-item">
+                <span className="legend-color-box" style={{ background: '#ef4444', borderRadius: '50%', border: '1.5px solid #ffffff' }}></span>
+                <span className="legend-label">Điểm dân cư & Đô thị</span>
               </div>
             );
           }

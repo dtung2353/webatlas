@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "import:data": "node scripts/import_all_geojson.js",
     "lint": "oxlint",
     "preview": "vite preview"
   },

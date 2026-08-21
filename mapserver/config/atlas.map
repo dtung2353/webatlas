@@ -5,6 +5,16 @@ MAP
   UNITS DD
   IMAGECOLOR 255 255 255
   SHAPEPATH "/data"
+  FONTSET "/etc/mapserver/fonts.txt"
+
+  SYMBOL
+    NAME "circle"
+    TYPE ELLIPSE
+    FILLED TRUE
+    POINTS
+      1 1
+    END
+  END
 
   WEB
     METADATA
@@ -30,8 +40,10 @@ MAP
     TYPE POLYGON
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM bien_gioi_tinh USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM bien_gioi_tinh USING UNIQUE fid USING SRID=4326"
     STATUS ON
+    TOLERANCE 10
+    TOLERANCEUNITS pixels
     PROJECTION
       "init=epsg:4326"
     END
@@ -41,39 +53,80 @@ MAP
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
+      NAME "Province"
       STYLE
-        COLOR 240 240 240
-        OUTLINECOLOR 100 100 100
+        OUTLINECOLOR 75 85 99
         WIDTH 1.5
       END
     END
   END
 
   # -----------------------------------------------------------
-  # LAYER 2: Ranh giới Xã/Phường (gadm41_vnm_3)
+  # LAYER 1B: Nhãn Tỉnh ở Trung tâm (diaphantinh_label)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "diaphantinh_label"
+    TYPE POINT
+    CONNECTIONTYPE POSTGIS
+    CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
+    DATA "center_geom FROM (SELECT fid, adm1_name1, ST_PointOnSurface(geom) AS center_geom FROM bien_gioi_tinh) AS subquery USING UNIQUE fid USING SRID=4326"
+    STATUS ON
+    LABELITEM "adm1_name1"
+    PROCESSING "LABEL_NO_CLIP=ON"
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Nhãn Ranh giới Tỉnh"
+      "wms_name" "diaphantinh_label"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+    END
+    CLASS
+      NAME "Province Label"
+      LABEL
+        TYPE TRUETYPE
+        FONT "sans-bold"
+        SIZE 10.5
+        COLOR 30 41 59
+        OUTLINECOLOR 255 255 255
+        OUTLINEWIDTH 2.5
+        POSITION CC
+        FORCE TRUE
+        ENCODING "UTF-8"
+      END
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 2: Ranh giới Quốc gia (gadm41_vnm_3)
   # -----------------------------------------------------------
   LAYER
     NAME "gadm41_vnm_3"
     TYPE POLYGON
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM ranh_gioi_xa USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM bien_gioi_quoc_gia USING UNIQUE fid USING SRID=4326"
     STATUS ON
+    TOLERANCE 10
+    TOLERANCEUNITS pixels
     PROJECTION
       "init=epsg:4326"
     END
     METADATA
-      "wms_title" "Ranh giới Xã/Phường"
+      "wms_title" "Ranh giới Quốc gia"
       "wms_name" "gadm41_vnm_3"
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
       STYLE
-        COLOR 250 250 250
         OUTLINECOLOR 160 160 160
         WIDTH 0.8
       END
@@ -88,8 +141,10 @@ MAP
     TYPE LINE
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM he_thong_song_suoi USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM song_suoi USING UNIQUE fid USING SRID=4326"
     STATUS ON
+    TOLERANCE 15
+    TOLERANCEUNITS pixels
     PROJECTION
       "init=epsg:4326"
     END
@@ -99,7 +154,9 @@ MAP
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
       STYLE
         COLOR 14 165 233
@@ -109,43 +166,17 @@ MAP
   END
 
   # -----------------------------------------------------------
-  # LAYER 4: Hệ thống Đê điều & Thủy lợi (de_dieu)
-  # -----------------------------------------------------------
-  LAYER
-    NAME "de_dieu"
-    TYPE LINE
-    CONNECTIONTYPE POSTGIS
-    CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM he_thong_de_dieu USING UNIQUE id USING SRID=4326"
-    STATUS ON
-    PROJECTION
-      "init=epsg:4326"
-    END
-    METADATA
-      "wms_title" "Hệ thống Đê điều"
-      "wms_name" "de_dieu"
-      "wms_srs" "EPSG:4326 EPSG:3857"
-      "wfs_enable_request" "*"
-      "gml_include_items" "all"
-    END
-    CLASS
-      STYLE
-        COLOR 217 119 6
-        WIDTH 2.5
-      END
-    END
-  END
-
-  # -----------------------------------------------------------
-  # LAYER 5: Đập & Hồ chứa Thủy điện (thuydienvietnam)
+  # LAYER 4: Đập & Hồ chứa Thủy điện (thuydienvietnam)
   # -----------------------------------------------------------
   LAYER
     NAME "thuydienvietnam"
     TYPE POINT
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM ho_chua_dap USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM ho_chua_dap USING UNIQUE fid USING SRID=4326"
     STATUS ON
+    TOLERANCE 15
+    TOLERANCEUNITS pixels
     PROJECTION
       "init=epsg:4326"
     END
@@ -155,7 +186,9 @@ MAP
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
       STYLE
         SYMBOL "circle"
@@ -167,62 +200,194 @@ MAP
   END
 
   # -----------------------------------------------------------
-  # LAYER 6: Trạm Quan trắc (tram_quan_trac)
+  # LAYER 5: Hồ mặt nước (ho_mat_nuoc)
   # -----------------------------------------------------------
   LAYER
-    NAME "tram_quan_trac"
-    TYPE POINT
+    NAME "ho_mat_nuoc"
+    TYPE POLYGON
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM tram_quan_trac USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM ho_mat_nuoc USING UNIQUE fid USING SRID=4326"
     STATUS ON
     PROJECTION
       "init=epsg:4326"
     END
     METADATA
-      "wms_title" "Trạm Quan trắc"
-      "wms_name" "tram_quan_trac"
+      "wms_title" "Hồ mặt nước"
+      "wms_name" "ho_mat_nuoc"
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
       STYLE
-        SYMBOL "circle"
-        COLOR 59 130 246
-        OUTLINECOLOR 255 255 255
-        SIZE 7
+        COLOR 56 189 248
+        OUTLINECOLOR 14 165 233
+        WIDTH 0.8
       END
     END
   END
 
   # -----------------------------------------------------------
-  # LAYER 7: Vùng Ngập lụt (vung_ngap_lut)
+  # LAYER 6: Đường sắt Việt Nam (duong_sat_viet_nam)
   # -----------------------------------------------------------
   LAYER
-    NAME "vung_ngap_lut"
-    TYPE POLYGON
+    NAME "duong_sat_viet_nam"
+    TYPE LINE
     CONNECTIONTYPE POSTGIS
     CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
-    DATA "geom FROM vung_ngap_lut USING UNIQUE id USING SRID=4326"
+    DATA "geom FROM duong_sat_viet_nam USING UNIQUE fid USING SRID=4326"
     STATUS ON
     PROJECTION
       "init=epsg:4326"
     END
     METADATA
-      "wms_title" "Vùng Ngập lụt"
-      "wms_name" "vung_ngap_lut"
+      "wms_title" "Đường sắt Việt Nam"
+      "wms_name" "duong_sat_viet_nam"
       "wms_srs" "EPSG:4326 EPSG:3857"
       "wfs_enable_request" "*"
       "gml_include_items" "all"
+      "wms_include_items" "all"
     END
+    TEMPLATE "dummy"
     CLASS
       STYLE
-        COLOR 239 68 68
-        OUTLINECOLOR 185 28 28
-        WIDTH 1.5
+        COLOR 75 85 99
+        WIDTH 2.0
       END
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 7: Giao thông đường đi (giao_thong_duong_di)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "giao_thong_duong_di"
+    TYPE LINE
+    CONNECTIONTYPE POSTGIS
+    CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
+    DATA "geom FROM giao_thong_duong_di USING UNIQUE fid USING SRID=4326"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Giao thông đường đi"
+      "wms_name" "giao_thong_duong_di"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+      "wfs_enable_request" "*"
+      "gml_include_items" "all"
+      "wms_include_items" "all"
+    END
+    TEMPLATE "dummy"
+    CLASS
+      STYLE
+        COLOR 245 158 11
+        WIDTH 1.0
+      END
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 8: Địa điểm dân cư (dia_diem_dan_cu)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "dia_diem_dan_cu"
+    TYPE POINT
+    CONNECTIONTYPE POSTGIS
+    CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
+    DATA "geom FROM dia_diem_dan_cu USING UNIQUE fid USING SRID=4326"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Địa điểm dân cư"
+      "wms_name" "dia_diem_dan_cu"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+      "wfs_enable_request" "*"
+      "gml_include_items" "all"
+      "wms_include_items" "all"
+    END
+    TEMPLATE "dummy"
+    CLASS
+      STYLE
+        SYMBOL "circle"
+        COLOR 239 68 68
+        OUTLINECOLOR 255 255 255
+        SIZE 5
+      END
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 9: Phủ bề mặt / Sử dụng đất (phu_be_mat_su_dung_dat)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "phu_be_mat_su_dung_dat"
+    TYPE POLYGON
+    CONNECTIONTYPE POSTGIS
+    CONNECTION "host=postgis dbname=gis user=postgres password=postgres port=5432"
+    DATA "geom FROM phu_be_mat_su_dung_dat USING UNIQUE fid USING SRID=4326"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Phủ bề mặt - Sử dụng đất"
+      "wms_name" "phu_be_mat_su_dung_dat"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+      "wfs_enable_request" "*"
+      "gml_include_items" "all"
+      "wms_include_items" "all"
+    END
+    TEMPLATE "dummy"
+    CLASS
+      STYLE
+        COLOR 34 197 94
+        OUTLINECOLOR 22 163 74
+        WIDTH 0.5
+      END
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 10: RASTER DEM (dem)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "dem"
+    TYPE RASTER
+    DATA "/data/processed/raster/06_DEM.tif"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Mô hình số độ cao DEM"
+      "wms_name" "dem"
+      "wms_srs" "EPSG:4326 EPSG:3857"
+    END
+  END
+
+  # -----------------------------------------------------------
+  # LAYER 11: RASTER HillShade (hillshade)
+  # -----------------------------------------------------------
+  LAYER
+    NAME "hillshade"
+    TYPE RASTER
+    DATA "/data/processed/raster/07_HillShade.tif"
+    STATUS ON
+    PROJECTION
+      "init=epsg:4326"
+    END
+    METADATA
+      "wms_title" "Bản đồ độ bóng Hillshade"
+      "wms_name" "hillshade"
+      "wms_srs" "EPSG:4326 EPSG:3857"
     END
   END
 
 END
+

@@ -133,6 +133,10 @@ const MapView: React.FC = () => {
     });
 
     // 2. Tạo WMS Layers từ MapServer local & Vector layers
+    const lakesLayer = createWMSLayer('layer_lakes', 'ho_mat_nuoc');
+    const roadsLayer = createWMSLayer('layer_roads', 'giao_thong_duong_di');
+    const railwaysLayer = createWMSLayer('layer_railways', 'duong_sat_viet_nam');
+    const residentialLayer = createWMSLayer('layer_residential', 'dia_diem_dan_cu');
     const damsLayer = createWMSLayer('layer_dams', 'thuydienvietnam');
     const riversLayer = createWMSLayer('layer_rivers', 'thuyhe');
     const stationsLayer = createVectorLayer('layer_stations', stationsMockData, stationsStyle);
@@ -141,7 +145,7 @@ const MapView: React.FC = () => {
     const saltwaterIntrusionLayer = createVectorLayer('layer_saltwater_intrusion', saltwaterIntrusionMockData, saltwaterIntrusionStyle);
     const floodGenerationLayer = createVectorLayer('layer_flood_generation', floodGenerationMockData, floodGenerationStyle);
 
-    const provincesLayer = createWMSLayer('layer_provinces_2026', 'diaphantinh');
+    const provincesLayer = createWMSLayer('layer_provinces_2026', 'diaphantinh,diaphantinh_label');
     const wardsLayer = createWMSLayer('layer_wards_2026', 'gadm41_vnm_3');
 
     // Layer highlight sông phát sáng
@@ -163,8 +167,12 @@ const MapView: React.FC = () => {
         initialBasemap, 
         provincesLayer,
         wardsLayer,
+        lakesLayer,
         floodLayer,
         riversLayer,
+        roadsLayer,
+        railwaysLayer,
+        residentialLayer,
         damsLayer,
         stationsLayer,
         droughtSurveyLayer,
@@ -271,7 +279,10 @@ const MapView: React.FC = () => {
     if (!popupData) return;
 
     const props = popupData.feature;
-    const isRiver = props && (props._layerName === 'thuyhe' || props._layerName === 'song_vietnam' || props.OBJECTID || props.Chieu_dai || props.Cap);
+    const isRiver = props && (
+      (props._layerName && (props._layerName.includes('thuyhe') || props._layerName.includes('song'))) || 
+      props.OBJECTID || props.Chieu_dai || props.chieu_dai || props.Cap || props.cap
+    );
 
     if (isRiver && popupData.coordinate) {
       const fetchRiverGeometry = async () => {

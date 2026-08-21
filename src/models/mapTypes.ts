@@ -23,5 +23,7 @@ export type {
   DamDetails,
   RelatedRivers,
   ChartDataItem,
-  ExportReportOptions
+  ExportReportOptions,
+  LakeFeatureProps,
+  LakeClassificationInfo
 } from '../shared/types/map';

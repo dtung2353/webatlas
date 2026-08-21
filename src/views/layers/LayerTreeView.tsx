@@ -18,7 +18,9 @@ import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
 const LayerTreeView: React.FC = () => {
   const { layersState, toggleLayerVisibility, setLayerOpacity } = useMapController();
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    'group_water_resources': true
+    'group_water_resources': true,
+    'group_infrastructure': true,
+    'group_admin': true
   });
 
   /** Mở rộng hoặc thu gọn 1 nhóm lớp */
